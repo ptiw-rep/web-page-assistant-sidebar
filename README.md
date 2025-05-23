@@ -1,4 +1,4 @@
-# Webpage-Assistant
+# Webpage-Assistant (Sidebar)
 
 A Chrome extension that helps you understand and chat with web page content using AI.
 
