@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web-Page Assistant</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="sources/marked.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div id="start-screen" class="screen active">
+      <div class="logo-container">
+        <div class="logo">
+          <i class="fas fa-comments"></i>
+        </div>
+      </div>
+      <h1>Web-Page Assistant</h1>
+      <p>Start a conversation with this webpage</p>
+      <button id="start-btn" class="btn primary">
+        <span>Start Chat</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <div id="loading-screen" class="screen">
+      <div class="loading-animation">
+        <div class="pulse"></div>
+      </div>
+      <p id="loading-status">Analyzing page content...</p>
+    </div>
+
+    <div id="chat-screen" class="screen">
+      <div class="chat-header">
+        <div class="page-info">
+          <div class="page-icon">
+            <img id="page-favicon" src="images/default-favicon.png" alt="Page icon">
+          </div>
+          <div class="page-title-container">
+            <h2 id="page-title" class="page-title">Current Page</h2>
+          </div>
+        </div>
+        <button id="new-chat-btn" class="icon-btn" title="New Chat">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <div id="summary-container" class="summary-container">
+        <div class="summary-header">
+          <h3>Page Summary</h3>
+          <button id="toggle-summary-btn" class="icon-btn" title="Toggle Summary">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+        <div id="summary-content" class="summary-content"></div>
+      </div>
+
+      <div id="chat-container" class="chat-container">
+        <div id="messages" class="messages"></div>
+      </div>
+
+      <div class="input-container">
+        <div class="input-wrapper">
+          <textarea id="user-input" placeholder="Ask about this page or request changes..." rows="1"></textarea>
+          <button id="send-btn" class="icon-btn send-btn" title="Send Message" disabled>
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
