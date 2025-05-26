@@ -9,7 +9,9 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "sidePanel"
+    "sidePanel",
+    "contextMenus",
+    "storage"
   ],
   "host_permissions": [
     "http://localhost:8000/*",

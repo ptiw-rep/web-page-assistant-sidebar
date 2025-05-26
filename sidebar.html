@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web-Page Assistant</title>
-  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="sidebar.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="sources/marked.min.js"></script>
 </head>
@@ -46,21 +46,38 @@
         </button>
       </div>
 
-      <div id="summary-container" class="summary-container">
-        <div class="summary-header">
-          <h3>Page Summary</h3>
-          <button id="toggle-summary-btn" class="icon-btn" title="Toggle Summary">
-            <i class="fas fa-chevron-down"></i>
+      <div id="context-container">
+        <div class="text-container">
+          <div class="text-section">
+            <h3>Selected Text</h3>
+            <div id="selected-text" class="text-content" contenteditable="true"></div>
+          </div>
+          <div class="text-section">
+            <h3>Processed Text</h3>
+            <div id="processed-text" class="text-content" contenteditable="true"></div>
+          </div>
+          <button id="reprocess-btn" class="btn primary">
+            <i class="fas fa-sync-alt"></i>
+            <span>Reprocess Text</span>
           </button>
         </div>
-        <div id="summary-content" class="summary-content"></div>
       </div>
 
       <div id="chat-container" class="chat-container">
+        <div id="summary-container" class="summary-container">
+          <div class="summary-header">
+            <h3>Page Summary</h3>
+            <button id="toggle-summary-btn" class="icon-btn" title="Toggle Summary">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+          <div id="summary-content" class="summary-content"></div>
+          <div class="summary-resize-handle"></div>
+        </div>
         <div id="messages" class="messages"></div>
       </div>
 
-      <div class="input-container">
+      <div id="input-container" class="input-container">
         <div class="input-wrapper">
           <textarea id="user-input" placeholder="Ask about this page or request changes..." rows="1"></textarea>
           <button id="send-btn" class="icon-btn send-btn" title="Send Message" disabled>
@@ -70,6 +87,6 @@
       </div>
     </div>
   </div>
-  <script src="popup.js"></script>
+  <script src="sidebar.js"></script>
 </body>
 </html>
