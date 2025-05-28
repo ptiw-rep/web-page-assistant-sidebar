@@ -22,6 +22,12 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ['selection']
   });
 
+  chrome.contextMenus.create({
+    id: 'interact',
+    title: 'Genie',
+    contexts: ['selection']
+  });
+
   // Create translation submenu items
   const languages = {
     'ko': 'Korean',
@@ -60,6 +66,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   } else if (info.menuItemId.startsWith('translate-')) {
     action = 'translate';
     targetLang = info.menuItemId.split('-')[1];
+  } else if (info.menuItemId === 'interact') {
+    action = 'interact';
   }
 
   // Store the context in local storage for the sidebar to access

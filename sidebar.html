@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web-Page Assistant</title>
   <link rel="stylesheet" href="sidebar.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="sources/marked.min.js"></script>
+  <link rel="stylesheet" href="fonts/fontawesome/css/all.min.css">
+  <script src="lib/marked.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <div id="start-screen" class="screen active">
+    <div id="start-screen" class="screen">
       <div class="logo-container">
         <div class="logo">
           <i class="fas fa-comments"></i>
@@ -63,6 +63,22 @@
         </div>
       </div>
 
+      <div id="interact-container" style="display: none;">
+        <div class="text-section">
+          <h3>Selected Content</h3>
+          <div class="selected-content text-content"></div>
+        </div>
+        <div id="interact-messages" class="messages"></div>
+        <div class="input-container">
+          <div class="input-wrapper">
+            <textarea id="interact-input" placeholder="Ask a question about the selected content..." rows="1"></textarea>
+            <button id="interact-send-btn" class="icon-btn send-btn" title="Send Message" disabled>
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div id="chat-container" class="chat-container">
         <div id="summary-container" class="summary-container">
           <div class="summary-header">
@@ -72,7 +88,6 @@
             </button>
           </div>
           <div id="summary-content" class="summary-content"></div>
-          <div class="summary-resize-handle"></div>
         </div>
         <div id="messages" class="messages"></div>
       </div>

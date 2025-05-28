@@ -348,8 +348,22 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 48px;
-  max-height: 50%;
-  transition: height var(--transition-smooth);
+  max-height: 150px;
+  transition: var(--transition-smooth);
+  overflow: hidden;
+}
+
+#summary-container.collapsed {
+  min-height: 48px;
+  max-height: 48px;
+}
+
+#summary-container.collapsed .summary-content {
+  display: none;
+}
+
+#summary-container.collapsed .summary-resize-handle {
+  display: none;
 }
 
 .summary-header {
@@ -368,34 +382,15 @@ body {
   line-height: 1.5;
   overflow-y: auto;
   flex: 1;
+  word-wrap: break-word;
+  max-height: calc(150px - 48px);
 }
 
-.summary-resize-handle {
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background-color: transparent;
-  cursor: ns-resize;
-  transition: background-color 0.2s ease;
-  z-index: 10;
-}
-
-.summary-resize-handle:hover {
-  background-color: var(--neutral-300);
-}
-
-.summary-resize-handle::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 2px;
-  background-color: var(--neutral-400);
-  border-radius: 2px;
+.summary-content p {
+  max-height: 150px;
+  overflow-y: auto; 
+  margin: 0; 
+  padding: 0; 
 }
 
 .messages {
@@ -412,6 +407,28 @@ body {
   flex-direction: column;
   max-width: 85%;
   animation: fadeIn 0.3s ease;
+}
+
+.message.selected-content {
+  max-width: 100%;
+  margin-bottom: var(--spacing-4);
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3);
+}
+
+.message.selected-content .message-content {
+  background-color: white;
+  border: 1px solid var(--neutral-200);
+}
+
+.message-content.editable {
+  outline: none;
+  cursor: text;
+}
+
+.message-content.editable:focus {
+  border-color: var(--primary-color);
 }
 
 @keyframes fadeIn {
@@ -439,6 +456,8 @@ body {
   font-size: 14px;
   line-height: 1.5;
   box-shadow: var(--shadow-sm);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .message.user .message-content {

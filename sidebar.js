@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadingStatus = document.getElementById('loading-status');
   const selectedTextElement = document.getElementById('selected-text');
   const processedTextElement = document.getElementById('processed-text');
-  const reprocessBtn = document.getElementById('reprocess-btn');
   const inputContainer = document.getElementById('input-container');
 
   // API Configuration
@@ -36,36 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let pageSummary = '';
   let currentAction = '';
   let currentTargetLang = '';
-
-  // Summary resize functionality
-  let isResizingSummary = false;
-  let initialY;
-  let initialHeight;
-
-  const summaryResizeHandle = document.querySelector('.summary-resize-handle');
-  if (summaryResizeHandle) {
-    summaryResizeHandle.addEventListener('mousedown', (e) => {
-      isResizingSummary = true;
-      initialY = e.clientY;
-      initialHeight = summaryContainer.offsetHeight;
-      
-      const handleMouseMove = (e) => {
-        if (!isResizingSummary) return;
-        const newHeight = initialHeight + (e.clientY - initialY);
-        const maxHeight = chatScreen.offsetHeight / 2;
-        summaryContainer.style.height = `${Math.max(48, Math.min(maxHeight, newHeight))}px`;
-      };
-      
-      const handleMouseUp = () => {
-        isResizingSummary = false;
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    });
-  }
+  let selectedContent = '';
 
   // Check for context menu action
   const checkContextAction = async () => {
@@ -77,25 +47,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (chatScreen) chatScreen.classList.add('active');
         if (startScreen) startScreen.classList.remove('active');
         if (loadingScreen) loadingScreen.classList.remove('active');
-        
-        if (chatContainer) chatContainer.style.display = 'none';
-        if (contextContainer) contextContainer.style.display = 'block';
-        if (inputContainer) inputContainer.style.display = 'none';
 
         const { action, text, targetLang } = contextAction;
         currentAction = action;
         currentTargetLang = targetLang;
-        
-        if (selectedTextElement) {
-          selectedTextElement.textContent = text;
-        }
+        selectedContent = text;
 
-        try {
-          await processText(text, action, targetLang);
-        } catch (error) {
-          console.error('Error processing text:', error);
-          if (processedTextElement) {
-            processedTextElement.textContent = 'Error processing text. Please try again.';
+        if (action === 'interact') {
+          if (chatContainer) chatContainer.style.display = 'flex';
+          if (contextContainer) contextContainer.style.display = 'none';
+          if (summaryContainer) {
+            summaryContainer.style.display = 'none';
+          }
+          if (messages) {
+            messages.innerHTML = '';
+            // Add selected content as a special message
+            const contentMessage = document.createElement('div');
+            contentMessage.classList.add('message', 'selected-content');
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content', 'editable');
+            contentDiv.setAttribute('contenteditable', 'true');
+            contentDiv.textContent = text;
+            contentDiv.addEventListener('input', () => {
+              selectedContent = contentDiv.textContent;
+            });
+            contentMessage.appendChild(contentDiv);
+            messages.appendChild(contentMessage);
+            addMessage("I'm ready to help you with the selected content. What would you like to know?", 'ai');
+          }
+          if (inputContainer) {
+            inputContainer.style.display = 'block';
+            if (userInput) {
+              userInput.value = '';
+              userInput.disabled = false;
+            }
+            if (sendBtn) {
+              sendBtn.disabled = true;
+            }
+          }
+        } else {
+          if (chatContainer) chatContainer.style.display = 'none';
+          if (contextContainer) contextContainer.style.display = 'block';
+          if (inputContainer) inputContainer.style.display = 'none';
+          
+          if (selectedTextElement) {
+            selectedTextElement.textContent = text;
+          }
+
+          try {
+            await processText(text, action, targetLang);
+          } catch (error) {
+            console.error('Error processing text:', error);
+            if (processedTextElement) {
+              processedTextElement.textContent = 'Error processing text. Please try again.';
+            }
           }
         }
 
@@ -132,19 +137,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       throw error;
     }
   };
-
-  // Reprocess text
-  if (reprocessBtn) {
-    reprocessBtn.addEventListener('click', async () => {
-      const newText = selectedTextElement.textContent;
-      try {
-        await processText(newText, currentAction, currentTargetLang);
-      } catch (error) {
-        console.error('Error reprocessing text:', error);
-        processedTextElement.textContent = 'Error processing text. Please try again.';
-      }
-    });
-  }
 
   // Functions
   const showScreen = (screen) => {
@@ -231,12 +223,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const askQuestion = async (token, question) => {
-    const response = await fetch(`${API_BASE_URL}/ask/`, {
+    const endpoint = currentAction === 'interact' ? '/chat_about_content/' : '/ask/';
+    const body = currentAction === 'interact' 
+      ? { question, selectedContent }
+      : { token, question };
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token, question }),
+      body: JSON.stringify(body),
     });
     
     if (!response.ok) {
@@ -251,6 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     showScreen(loadingScreen);
     if (chatContainer) chatContainer.style.display = 'flex';
     if (contextContainer) contextContainer.style.display = 'none';
+    if (summaryContainer) summaryContainer.style.display = 'block';
     if (inputContainer) inputContainer.style.display = 'block';
     
     try {
@@ -274,6 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       pageData.token = await uploadHtml(pageData.html);
       
       // Generate summary of the page
+      if (loadingStatus) loadingStatus.textContent = "Generating page summary...";
       pageSummary = await getPageSummary(pageData.token);
       if (summaryContent) summaryContent.innerHTML = marked.parse(pageSummary);
       
@@ -298,7 +297,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const handleSendMessage = async () => {
     const message = userInput.value.trim();
-    if (!message || !pageData.token) return;
+    if (!message) return;
+    
+    // For interact mode, we don't need a token
+    if (!currentAction && !pageData.token) return;
     
     addMessage(message, "user");
     userInput.value = "";
@@ -325,8 +327,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (messages) messages.innerHTML = '';
       chatHistory = [];
       pageData.token = null;
+      currentAction = '';
+      selectedContent = '';
       if (chatContainer) chatContainer.style.display = 'flex';
       if (contextContainer) contextContainer.style.display = 'none';
+      if (summaryContainer) {
+        summaryContainer.style.display = 'block';
+        summaryContainer.classList.remove('collapsed');
+      }
       if (inputContainer) inputContainer.style.display = 'block';
       showScreen(startScreen);
     });
