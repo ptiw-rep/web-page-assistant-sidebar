@@ -263,6 +263,12 @@ body {
   text-overflow: ellipsis;
 }
 
+.chat-actions {
+  display: flex;
+  gap: 8px; /* Optional: spacing between buttons */
+  margin-left: auto; /* Pushes to right */
+}
+
 .icon-btn {
   width: 32px;
   height: 32px;
@@ -276,12 +282,14 @@ body {
   justify-content: center;
   color: var(--neutral-600);
   transition: var(--transition-base);
+  /* margin-left: auto; */
 }
 
 .icon-btn:hover {
   background-color: var(--neutral-100);
   color: var(--neutral-800);
 }
+
 
 /* Context Container Styles */
 #context-container {

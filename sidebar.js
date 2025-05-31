@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const selectedTextElement = document.getElementById('selected-text');
   const processedTextElement = document.getElementById('processed-text');
   const inputContainer = document.getElementById('input-container');
+  const clearChatBtn = document.getElementById('clear-chat-icon-btn');
+  // clearChatBtn.className = 'icon-btn';
+  // clearChatBtn.title = 'Clear Chat';
+  // clearChatBtn.innerHTML = '<i class="fas fa-trash"></i>';
 
   // API Configuration
   const API_BASE_URL = 'http://localhost:8000';
@@ -36,6 +40,65 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentAction = '';
   let currentTargetLang = '';
   let selectedContent = '';
+
+
+  // Load chat history from local storage
+  const loadChatHistory = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // const key = currentAction === 'interact' ? 
+    //   `interact_history_${tab.url}_${selectedContent}` : 
+    //   `chat_history_${tab.url}`;
+    
+    const key = `chat_history_${tab.url}`;
+
+    const stored = await chrome.storage.local.get(key);
+    chatHistory = stored[key] || [];
+    
+    // Render stored messages
+    if (messages) {
+      messages.innerHTML = '';
+      chatHistory.forEach(msg => addMessage(msg.content, msg.sender, false));
+    }
+  };
+
+  // Save chat history to local storage
+  const saveChatHistory = async () => {
+    
+    if (currentAction === 'interact') {
+      return; // No need to save interact history in this event
+    }
+
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // const key = currentAction === 'interact' ? 
+    //   `interact_history_${tab.url}_${selectedContent}` : 
+    //   `chat_history_${tab.url}`;
+    
+    const key = `chat_history_${tab.url}`;
+
+    await chrome.storage.local.set({ [key]: chatHistory });
+  };
+
+  // Clear chat history
+  const clearChat = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // const key = currentAction === 'interact' ? 
+    //   `interact_history_${tab.url}_${selectedContent}` : 
+    //   `chat_history_${tab.url}`;
+    
+    const key = `chat_history_${tab.url}`;
+
+    await chrome.storage.local.remove(key);
+    chatHistory = [];
+    if (messages) messages.innerHTML = '';
+
+    // Add initial message based on context
+    // if (currentAction === 'interact') {
+    //   addMessage("I'm ready to help you with the selected content. What would you like to know?", 'ai');
+    // } else {
+    //   addMessage("I've analyzed this page. How can I help you with it today?", "ai");
+    // }
+    addMessage("I've analyzed the content. How can I help you with it today?", "ai");
+  };
 
   // Check for context menu action
   const checkContextAction = async () => {
@@ -75,6 +138,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             messages.appendChild(contentMessage);
             addMessage("I'm ready to help you with the selected content. What would you like to know?", 'ai');
           }
+
+          // Add clear chat button to header
+          // const chatHeader = document.querySelector('.chat-header');
+          // if (chatHeader && !chatHeader.contains(clearChatBtn)) {
+          //   chatHeader.insertBefore(clearChatBtn, newChatBtn);
+          // }
+          
+          // await loadChatHistory();
+
           if (inputContainer) {
             inputContainer.style.display = 'block';
             if (userInput) {
@@ -171,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const addMessage = (content, sender) => {
+  const addMessage = (content, sender, save = true) => {
     const messageEl = document.createElement('div');
     messageEl.classList.add('message', sender);
     
@@ -191,7 +263,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       messages.scrollTop = messages.scrollHeight;
     }
     
-    chatHistory.push({ content, sender, timestamp: new Date() });
+    if (save) {
+      chatHistory.push({ content, sender, timestamp: new Date() });
+      saveChatHistory();
+    }
   };
 
   const uploadHtml = async (html) => {
@@ -282,11 +357,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Update page info in the chat header
       updatePageInfo();
       
-      // Show welcome message
-      setTimeout(() => {
-        showScreen(chatScreen);
+      // Add clear chat button to header
+      // const chatHeader = document.querySelector('.chat-header');
+      // if (chatHeader && !chatHeader.contains(clearChatBtn)) {
+      //   chatHeader.insertBefore(clearChatBtn, newChatBtn);
+      // }
+      
+      // Load existing chat history
+      await loadChatHistory();
+      
+      // Show chat screen
+      showScreen(chatScreen);
+      
+      // Add welcome message if no history exists
+      if (chatHistory.length === 0) {
         addMessage("I've analyzed this page. How can I help you with it today?", "ai");
-      }, 500);
+      }
       
     } catch (error) {
       console.error("Error starting chat:", error);
@@ -322,6 +408,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (startBtn) startBtn.addEventListener('click', startChat);
   if (toggleSummaryBtn) toggleSummaryBtn.addEventListener('click', toggleSummary);
   
+  if (clearChatBtn) clearChatBtn.addEventListener('click', clearChat);
+
   if (newChatBtn) {
     newChatBtn.addEventListener('click', () => {
       if (messages) messages.innerHTML = '';
