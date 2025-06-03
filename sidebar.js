@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const processedTextElement = document.getElementById('processed-text');
   const inputContainer = document.getElementById('input-container');
   const clearChatBtn = document.getElementById('clear-chat-icon-btn');
+  const pageInfo = document.querySelector('.page-info');
+   const toggleHistoryBtn = document.getElementById('toggle-history-btn');
   // clearChatBtn.className = 'icon-btn';
   // clearChatBtn.title = 'Clear Chat';
   // clearChatBtn.innerHTML = '<i class="fas fa-trash"></i>';
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentAction = '';
   let currentTargetLang = '';
   let selectedContent = '';
-
+  let showingHistory = true;
 
   // Load chat history from local storage
   const loadChatHistory = async () => {
@@ -100,12 +102,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     addMessage("I've analyzed the content. How can I help you with it today?", "ai");
   };
 
+  // Toggle chat history
+  const toggleHistory = () => {
+    showingHistory = !showingHistory;
+    if (messages) {
+      messages.classList.toggle('hide-history');
+    }
+    toggleHistoryBtn.classList.toggle('active');
+  };
+
   // Check for context menu action
   const checkContextAction = async () => {
     const { contextAction } = await chrome.storage.local.get('contextAction');
     if (contextAction) {
       const isNewAction = Date.now() - contextAction.timestamp < 1000;
-      
+      if (toggleHistoryBtn) toggleHistoryBtn.style.display = 'none';
+      if (clearChatBtn) clearChatBtn.style.display = 'none';
+
       if (isNewAction) {
         if (chatScreen) chatScreen.classList.add('active');
         if (startScreen) startScreen.classList.remove('active');
@@ -116,12 +129,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentTargetLang = targetLang;
         selectedContent = text;
 
+        // Hide page info for context menu actions
+        if (pageInfo) pageInfo.style.display = 'none';
+
         if (action === 'interact') {
           if (chatContainer) chatContainer.style.display = 'flex';
           if (contextContainer) contextContainer.style.display = 'none';
-          if (summaryContainer) {
-            summaryContainer.style.display = 'none';
-          }
+          if (summaryContainer) summaryContainer.style.display = 'none';
+          
           if (messages) {
             messages.innerHTML = '';
             // Add selected content as a special message
@@ -161,7 +176,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (chatContainer) chatContainer.style.display = 'none';
           if (contextContainer) contextContainer.style.display = 'block';
           if (inputContainer) inputContainer.style.display = 'none';
-          
+
+
           if (selectedTextElement) {
             selectedTextElement.textContent = text;
           }
@@ -325,7 +341,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (contextContainer) contextContainer.style.display = 'none';
     if (summaryContainer) summaryContainer.style.display = 'block';
     if (inputContainer) inputContainer.style.display = 'block';
-    
+    if (toggleHistoryBtn) toggleHistoryBtn.style.display = 'block';
+    if (clearChatBtn) clearChatBtn.style.display = 'block';
+
     try {
       // Get current tab info
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -409,6 +427,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (toggleSummaryBtn) toggleSummaryBtn.addEventListener('click', toggleSummary);
   
   if (clearChatBtn) clearChatBtn.addEventListener('click', clearChat);
+  if (toggleHistoryBtn) toggleHistoryBtn.addEventListener('click', toggleHistory);
+
 
   if (newChatBtn) {
     newChatBtn.addEventListener('click', () => {
@@ -419,11 +439,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       selectedContent = '';
       if (chatContainer) chatContainer.style.display = 'flex';
       if (contextContainer) contextContainer.style.display = 'none';
+      
       if (summaryContainer) {
         summaryContainer.style.display = 'block';
         summaryContainer.classList.remove('collapsed');
       }
       if (inputContainer) inputContainer.style.display = 'block';
+      if (pageInfo) pageInfo.style.display = 'flex';
       showScreen(startScreen);
     });
   }

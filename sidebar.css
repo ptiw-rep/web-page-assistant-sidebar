@@ -269,6 +269,12 @@ body {
   margin-left: auto; /* Pushes to right */
 }
 
+.chat-actions {
+  display: flex;
+  gap: 8px; /* Optional: spacing between buttons */
+  margin-left: auto; /* Pushes to right */
+}
+
 .icon-btn {
   width: 32px;
   height: 32px;
@@ -408,6 +414,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
+  word-break: break-word;
 }
 
 .message {
@@ -466,6 +473,7 @@ body {
   box-shadow: var(--shadow-sm);
   word-wrap: break-word;
   overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .message.user .message-content {
@@ -544,4 +552,33 @@ body {
 
 .send-btn:not([disabled]) {
   color: var(--primary-color);
+}
+
+.toggle-history-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  background-color: var(--neutral-100);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--neutral-600);
+  transition: var(--transition-base);
+}
+
+.toggle-history-btn:hover {
+  background-color: var(--neutral-200);
+  color: var(--neutral-800);
+}
+
+.toggle-history-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.messages.hide-history .message:not(:first-child) {
+  display: none;
 }
